@@ -1,4 +1,3 @@
-#gzet key pressed with turtle and write it on the screen
 import turtle
 
 def get_pseudo():
