@@ -1,0 +1,11 @@
+Battaille Naval:
+
+    variable communes:
+        - grille_bateau = []
+        - grille_tire = []
+        - current_player = ""
+
+    fonctions principale:
+        -
+        -
+        -
