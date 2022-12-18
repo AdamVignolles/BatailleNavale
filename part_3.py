@@ -1,3 +1,4 @@
+# encoding: utf-8
 import socket
 import threading
 import GetPseudo
@@ -11,61 +12,43 @@ def send_user_connect(connexion, name):
         connexion.sendall(f"player_online/{name}".encode("utf-8"))
         time.sleep(60)
 
-# method gere le serveur
-def serveur(connexion):
+#method pour ecouter les messages du serveur
+def listen_server(connexion):
     while True:
-        #recuperer les donnees
         data = connexion.recv(1024)
         data = data.decode("utf-8")
+        print(data)
 
-        #envoyer la reponse
-        connexion.sendall("Connexion établie".encode("utf-8"))
 
-        #lancer le jeu
-        #game(connexion)
-
-def new_user():
-    # creer un nouveau utilisateur
+#method pour gerer la connexion et/ou le start d'un serv d'un nouveau joueur
+def connect_new_user(pseudo, port=12345):
     
-    # recuperer le nom de l'utilisateur
-    name = GetPseudo.get_pseudo()
-
-    #verifier si un serveur est en ligne
+    #on esai de se connecter au serveur si il n'y a pas de reponse on lance un serveur
     try:
-        # creer une connexion
+        #creation de la socket
+        print(1)
         connexion = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        connexion.connect(('localhost', 12345))
-        print("Connexion établie avec le serveur")
-
-        # envoyer joueur en ligne
-        threading.Thread(target=send_user_connect, args=(connexion, name)).start()
-        
-
-        #recuperer la reponse du serveur
-        data = connexion.recv(1024)
-        print(data.decode("utf-8"))
-
-        #lancer le jeu
-        #game(connexion)
-
+        connexion.connect(('localhost', port))
+        # on envoi le pseudo du joueur
+        connexion.sendall(f"pseudo/{pseudo}".encode("utf-8"))
+        print(2)
     except:
-        # si le serveur n'est pas en ligne on lance un serveur
+        print(3)
+        #creation de la socket
+        connexion = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        connexion.bind(('localhost', port))
+        connexion.listen(5)
+        connexion, infos_connexion = connexion.accept()
+        # on envoi le pseudo du joueur
+        connexion.sendall(f"pseudo/{pseudo}".encode("utf-8"))
+        print(4)
 
-        # creer une serveur
-        serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        serveur.bind(('localhost', 12345))
-        serveur.listen(5)
-        print("Serveur en ligne")
+    return connexion
 
-        # accepter les connexions
-        connexion, adresse = serveur.accept()
-        print("Connexion établie avec le client")
-
-        
-
-
-
-
-
-new_user()
+# essai 
+connexion = connect_new_user("Adam")
+while True:
+    data = connexion.recv(1024)
+    data = data.decode("utf-8")
+    print(data)
 

@@ -1,8 +1,14 @@
 Battaille Naval:
 
     variable communes:
-        - grille_bateau = []
-        - grille_tire = []
+        - grilles = {
+            joueur1(pseudo) : {
+                batteaux : [], 
+                attack : []}, 
+            jooueur2(pseudo) : {
+                batteaux : [], 
+                attack : []}, 
+            }
         - current_player = ""
 
     fonctions principale:
