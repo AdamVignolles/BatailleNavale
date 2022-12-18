@@ -5,5 +5,6 @@ def get_pseudo():
     key = turtle.textinput("Enrer votre Pseudo", "Pseudo:")
     return key
 
-print(get_pseudo())
-turtle.exitonclick()
+if __name__ == "__main__":
+    print(get_pseudo())
+    turtle.exitonclick()
