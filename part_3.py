@@ -8,9 +8,6 @@ import json
 #########s convert str '{joueur1:{grille:[0, 0, 0,0 ], bateaux:[]}, joueur2:{grille:[], bateaux:[]}}' to dict
 dico = json.loads('{"joueur1":{"grille":[0,0,0,0], "bateaux":[]}, "joueur2":{"grille":[], "bateaux":[]}}')
 
-print(int(time.time()))
-
-
 # gerer la partie resaux du jeu de la bataille naval
 
 #method get lsite des joueur en ligne
@@ -18,15 +15,14 @@ def get_liste_joueur():
     return liste_joueur
 
 # method check_joueur_online
-def check_joueur_online(data):
+def check_joueur_online():
     
-    if data[0] == "player_online":
-        # recuperer depuis combien de temps le joueur est en ligne
-        liste_joueur[data[1]] = time.time
-    
+    # supprimer les joueur qui sont plus en ligne depuis plus de 60 secondes
     for i in liste_joueur:
-        if time.time() - liste_joueur[i] > 60:
+        if int(liste_joueur[i] - time.time()) > 60:
             del liste_joueur[i]
+
+    return liste_joueur
 
 
 #method pour envoyer toutes les minuttes que le joueur est toujours en ligne
@@ -43,7 +39,7 @@ def listen_server(connexion):
         # thread le get liste joueur
         data = data.split("/")
         if data[0] == "player_online":
-            threading.Thread(target=check_joueur_online(data)).start()
+            liste_joueur[data[1]] = time.time()
         return data
 
 
@@ -74,8 +70,11 @@ def connect_new_user(pseudo, port=12345):
 
 # essai 
 liste_joueur = {}
-connexion = connect_new_user("Adam")
-threading.Thread(target=listen_server).start()
+pseudo = "Adam"
+connexion = connect_new_user(pseudo)
+threading.Thread(target=listen_server(connexion)).start()
+threading.Thread(target=send_user_connect(connexion, pseudo)).start()
 while True:
     print(get_liste_joueur())
+    time.sleep(1)
 
