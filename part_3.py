@@ -10,6 +10,13 @@ dico = json.loads('{"joueur1":{"grille":[0,0,0,0], "bateaux":[]}, "joueur2":{"gr
 
 # gerer la partie resaux du jeu de la bataille naval
 
+# method accepter une connexion
+def accept_connexion():
+    while True:
+        connexion, infos_connexion = sock[0].accept()
+        sock = [connexion, infos_connexion]
+
+
 #method get lsite des joueur en ligne
 def get_liste_joueur():
     return liste_joueur
@@ -55,6 +62,7 @@ def connect_new_user(pseudo, port=12345):
         print(1)
         connexion = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         connexion.connect(('localhost', port))
+        sock[0] = connexion
         # thread et on envoi le pseudo du joueur
         threading.Thread(target=send_user_connect, args=(connexion, pseudo)).start()
         print(2)
@@ -66,14 +74,18 @@ def connect_new_user(pseudo, port=12345):
         connexion.bind(('localhost', port))
         connexion.listen()
         connexion, infos_connexion = connexion.accept()
-        threading.Thread(target=send_user_connect, args=(connexion, pseudo)).start()
+        sock = [connexion, infos_connexion]
+        threading.Thread(target=accept_connexion, args=(sock[0],)).start()
+        threading.Thread(target=send_user_connect, args=(sock[0], pseudo)).start()
         print(4)       
 
     return connexion
 
 # essai 
+sock = [None, None]
 liste_joueur = {}
 pseudo = GetPseudo.get_pseudo()
 connexion = connect_new_user(pseudo)
-threading.Thread(target=listen_server, args=(connexion,)).start()
+sock[0] = connexion
+threading.Thread(target=listen_server, args=(sock[0],)).start()
 threading.Thread(target=check_joueur_online).start()
