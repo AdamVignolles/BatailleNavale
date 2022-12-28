@@ -84,7 +84,7 @@ def connect_new_user(pseudo, port=12345):
 # essai 
 sock = [None, None]
 liste_joueur = {}
-pseudo = GetPseudo.get_pseudo()
+pseudo = input("entrez votre pseudo: ")
 connexion = connect_new_user(pseudo)
 sock[0] = connexion
 threading.Thread(target=listen_server, args=(sock[0],)).start()
