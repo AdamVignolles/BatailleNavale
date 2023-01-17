@@ -78,12 +78,14 @@ def place_bateau(joueur):
 def tour(joueur_grille, current_player):
     # afficher les grilles du joueurs
     if current_player == joueur:
+        print(current_player, joueur)
         print(f"tour: Joueur {current_player}")
         print("bateaux:", joueur_grille["grille_bateau"])
         print("tir:",joueur_grille["grille_tir"])
         tir = int(input("case n° tir :"))
-        joueur_grille["grille_tir"][tir] = "t"
+        joueur_grille["grille_tir"][int(tir)] = "t"
         print("tir", joueur_grille["grille_tir"])
+        return tir
 
 #essai
 if __name__ == "__main__":
@@ -140,24 +142,34 @@ if __name__ == "__main__":
         # attendre le tour
         data = listen_message(sock)
         if data[0] == "tour":
-            current_player = int(data[1])
+            current_player = int(data[1][0])
+        
         # faire le tour
-        tour(grilles["joueur1"], current_player)
+        tir = tour(grilles[f"joueur{current_player}"], current_player)
         # envoyer la grille tir du joueur 1
-        send_message(sock, "grille_tir/joueur1/" + str(grilles["joueur1"]["grille_tir"]))
+        print(tir)
+        send_message(sock, f"grille_tir/joueur{current_player}/" + str(tir))
 
-        if current_player != 1:
-            #recuperer la grille tir du joueur 2
+        # recuperer message si besoin
+        if current_player != joueur:
             data = listen_message(sock)
+            print(data, joueur)
             if data[0] == "grille_tir":
-                grilles["joueur2"]["grille_tir"] = data[2]
-            current_player = 1
-        else:
-            #recuperer la grille tir du joueur 1
-            data = listen_message(sock)
-            if data[0] == "grille_tir":
-                grilles["joueur1"]["grille_tir"] = data[2]
+                grilles[data[1]]["grille_tir"][int(data[2])] = "t"
+
+        # afficher les grilles
+        print("grille joueur 1")
+        print("bateaux:", grilles["joueur1"]["grille_bateau"])
+        print("tir:",grilles["joueur1"]["grille_tir"])
+        print("grille joueur 2")
+        print("bateaux:", grilles["joueur2"]["grille_bateau"])
+        print("tir:",grilles["joueur2"]["grille_tir"])
+
+        #changer de joueur
+        if current_player == 1:
             current_player = 2
+        else:
+            current_player = 1
 
 
         # verifier si la partie est fini
