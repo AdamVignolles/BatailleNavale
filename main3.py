@@ -54,11 +54,33 @@ def become_client(port):
         return sock
     except:
         return None
+    
+def place_bateaux():
+     # attendre que le joueur 1 place ses bateaux
+        thread = threading.Thread(target=wait_bateau, args=(sock,))
+        thread.start()
+
+        # placer les bateaux
+        # place_bateaux()
+        grilles["joueur2"]["grille_bateau"] = [""]*100
+        grilles["joueur2"]["grille_tir"] = [""]*100
+
+        # envoyer la grille
+        send_message(sock, "grille_bateau/joueur2/" + str(grilles["joueur2"]["grille_bateau"]))
+
+        # attendre que les 2 joueurs place leurs bateaux
+        bateaux_placer = False
+        while not bateaux_placer:
+            # placer les bateaux
+            if grilles["joueur1"]["grille_bateau"] != [] and grilles["joueur2"]["grille_bateau"] != []:
+                bateaux_placer = True
+            bateaux_placer = True
+    
 
 def tour(joueur_grille, current_joueur):
     # afficher les grilles du joueurs
     if current_joueur == joueur:
-        print(f"tour {current_joueur}")
+        print(f"tour : Joueur {current_joueur}")
         print(joueur_grille["grille_bateau"])
         print(joueur_grille["grille_tir"])
         tir = int(input("case n° tir :"))
@@ -120,42 +142,25 @@ if __name__ == "__main__":
 
         print("vous etes le joueur 2")
         joueur = 2
-
-        # attendre que le joueur 1 place ses bateaux
-        thread = threading.Thread(target=wait_bateau, args=(sock,))
-        thread.start()
-
-        # placer les bateaux
-        # place_bateaux()
-        grilles["joueur2"]["grille_bateau"] = [""]*100
-        grilles["joueur2"]["grille_tir"] = [""]*100
-
-        # envoyer la grille
-        send_message(sock, "grille_bateau/joueur2/" + str(grilles["joueur2"]["grille_bateau"]))
-
-        # attendre que les 2 joueurs place leurs bateaux
-        bateaux_placer = False
-        while not bateaux_placer:
-            # placer les bateaux
-            if grilles["joueur1"]["grille_bateau"] != [] and grilles["joueur2"]["grille_bateau"] != []:
-                bateaux_placer = True
-            bateaux_placer = True
+    
+    # gerer le placement des bateaux des 2 joueur
+    place_bateaux()
         
     print("les bateaux sont placer")
     print(grilles)
 
     # commencer la partie
     print("commencer la partie")
+    current_player = 1
 
     # boucle de jeu
     while True:
-        tour(grilles["joueur1"], joueur)
+        
+        tour(grilles["joueur1"], current_player) # lancer le tour du joueur
+        # changé le jouer qui va joué
+        if current_player == 1: current_player = 2
+        else: current_player = 1
         break
-        # tour du joueur 1
-        # tour_joueur_1()
-
-        # tour du joueur 2
-        # tour_joueur_2()
 
         # verifier si la partie est fini
         # if fini:
