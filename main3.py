@@ -143,8 +143,22 @@ if __name__ == "__main__":
             current_player = int(data[1])
         # faire le tour
         tour(grilles["joueur1"], current_player)
-        if current_player == 1:current_player = 2
-        else:current_player = 1
+        # envoyer la grille tir du joueur 1
+        send_message(sock, "grille_tir/joueur1/" + str(grilles["joueur1"]["grille_tir"]))
+
+        if current_player != 1:
+            #recuperer la grille tir du joueur 2
+            data = listen_message(sock)
+            if data[0] == "grille_tir":
+                grilles["joueur2"]["grille_tir"] = data[2]
+            current_player = 1
+        else:
+            #recuperer la grille tir du joueur 1
+            data = listen_message(sock)
+            if data[0] == "grille_tir":
+                grilles["joueur1"]["grille_tir"] = data[2]
+            current_player = 2
+
 
         # verifier si la partie est fini
         # if fini:
