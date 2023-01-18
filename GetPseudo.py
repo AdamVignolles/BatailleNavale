@@ -2,7 +2,7 @@ import turtle
 
 def get_pseudo():
 
-    key = turtle.textinput("Enrer votre Pseudo", "Pseudo:")
+    key = turtle.textinput("Entrer le code du serveur(port)", "Code:")
     return key
 
 if __name__ == "__main__":
