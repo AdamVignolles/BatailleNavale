@@ -34,9 +34,9 @@ def become_server(port):
         # creer un socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # bind le socket
-        sock.bind(("", port))
+        sock.bind(('0.0.0.0', port))
         # ecouter les connexions
-        sock.listen(5)
+        sock.listen()
         # retourner le socket
         return sock
     except:
@@ -48,7 +48,7 @@ def become_client(port):
         # creer un socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # connecter le socket
-        sock.connect(("localhost", port))
+        sock.connect((socket.gethostbyname(socket.gethostname()), port))
         # retourner le socket
         return sock
     except:
