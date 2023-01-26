@@ -27,6 +27,45 @@ def listen_message(connexion):
 def send_message(connexion, message):
     connexion.sendall(message.encode("utf-8"))
 
+def ask_for_be_server_client():
+    if input("server ou client? ") == "server":
+        serveur_on = False
+        while not serveur_on:
+            port = int(input("code serveur: "))
+            sock = become_server(port)
+            if sock == None:
+                print("code deja utiliser")
+            else:
+                print("en attente de connexion")
+                sock, infos_connexion = sock.accept()
+                print("connexion accepter")
+                serveur_on = True
+
+        print("vous etes le joueur 1")
+        joueur = 1
+        
+        #placer les bateaux
+        place_bateau(joueur, sock)
+
+    else:
+        connect_with_serv = False
+        while not connect_with_serv:
+            port = int(input("code serveur: "))
+            sock = become_client(port)
+            if sock == None:
+                print("aucun serveur sur ce code trouver")
+            else:
+                print("client connecter")
+                connect_with_serv = True
+
+        print("vous etes le joueur 2")
+        joueur = 2
+
+        #placer les bateaux
+        place_bateau(joueur, sock)
+
+    return sock, joueur
+
 
 # method devenir un serveur
 def become_server(port):
@@ -54,7 +93,7 @@ def become_client(port):
     except:
         return None
 
-def place_bateau(joueur):
+def place_bateau(joueur, sock):
     # attendre que le joueur 1 place ses bateaux
         thread = threading.Thread(target=wait_bateau, args=(sock,))
         thread.start()
@@ -75,7 +114,7 @@ def place_bateau(joueur):
                 bateaux_placer = True
             bateaux_placer = True
 
-def tour(joueur_grille, current_player):
+def tour(joueur_grille, current_player, joueur):
     # afficher les grilles du joueurs
     if current_player == joueur:
         print(current_player, joueur)
@@ -87,55 +126,23 @@ def tour(joueur_grille, current_player):
         print("tir", joueur_grille["grille_tir"])
         return tir
 
-#essai
-if __name__ == "__main__":
-    grilles = {"joueur1": {"grille_bateau": [""]*100, "grille_tir": [""]*100}, "joueur2": {"grille_bateau": [""]*100, "grille_tir": [""]*100}}
-
-    if input("server ou client? ") == "server":
-        serveur_on = False
-        while not serveur_on:
-            port = int(input("code serveur: "))
-            sock = become_server(port)
-            if sock == None:
-                print("code deja utiliser")
-            else:
-                print("en attente de connexion")
-                sock, infos_connexion = sock.accept()
-                print("connexion accepter")
-                serveur_on = True
-
-        print("vous etes le joueur 1")
-        joueur = 1
-        
-        #placer les bateaux
-        place_bateau(joueur)
-
-
+def change_current_player(current_player):
+    if current_player == 1:
+        current_player = 2
     else:
-        connect_with_serv = False
-        while not connect_with_serv:
-            port = int(input("code serveur: "))
-            sock = become_client(port)
-            if sock == None:
-                print("aucun serveur sur ce code trouver")
-            else:
-                print("client connecter")
-                connect_with_serv = True
+        current_player = 1
+    return current_player
 
-        print("vous etes le joueur 2")
-        joueur = 2
+def affiche_les_grilles():
+    print("grille joueur 1")
+    print("bateaux:", grilles["joueur1"]["grille_bateau"])
+    print("tir:",grilles["joueur1"]["grille_tir"])
+    print("grille joueur 2")
+    print("bateaux:", grilles["joueur2"]["grille_bateau"])
+    print("tir:",grilles["joueur2"]["grille_tir"])
 
-        #placer les bateaux
-        place_bateau(joueur)   
-        
-    print("les bateaux sont placer")
 
-    # commencer la partie
-    print("commencer la partie")
-
-    current_player = 1
-
-    # boucle de jeu
+def boucle_jeu(sock, joueur, current_player):
     while True:
         # envoyer le tour
         send_message(sock, "tour/" + str(current_player))
@@ -145,7 +152,8 @@ if __name__ == "__main__":
             current_player = int(data[1][0])
         
         # faire le tour
-        tir = tour(grilles[f"joueur{current_player}"], current_player)
+        tir = tour(grilles[f"joueur{current_player}"], current_player, joueur)
+
         # envoyer la grille tir du joueur 1
         print(tir)
         send_message(sock, f"grille_tir/joueur{current_player}/" + str(tir))
@@ -158,20 +166,31 @@ if __name__ == "__main__":
                 grilles[data[1]]["grille_tir"][int(data[2])] = "t"
 
         # afficher les grilles
-        print("grille joueur 1")
-        print("bateaux:", grilles["joueur1"]["grille_bateau"])
-        print("tir:",grilles["joueur1"]["grille_tir"])
-        print("grille joueur 2")
-        print("bateaux:", grilles["joueur2"]["grille_bateau"])
-        print("tir:",grilles["joueur2"]["grille_tir"])
+        affiche_les_grilles()
 
         #changer de joueur
-        if current_player == 1:
-            current_player = 2
-        else:
-            current_player = 1
-
+        current_player = change_current_player(current_player)
 
         # verifier si la partie est fini
         # if fini:
         #   break
+
+def resaux_game():
+    # demander si le joueur veut etre serveur ou client
+    sock, joueur = ask_for_be_server_client()  
+        
+    print("les bateaux sont placer")
+
+    # commencer la partie
+    print("commencer la partie")
+
+    current_player = 1
+
+    # boucle de jeu
+    boucle_jeu(sock, joueur, current_player)
+
+#essai
+if __name__ == "__main__":
+    grilles = {"joueur1": {"grille_bateau": [""]*100, "grille_tir": [""]*100}, "joueur2": {"grille_bateau": [""]*100, "grille_tir": [""]*100}}
+
+    resaux_game()
