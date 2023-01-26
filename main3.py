@@ -34,7 +34,7 @@ def become_server(port):
         # creer un socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # bind le socket
-        sock.bind(('0.0.0.0', port))
+        sock.bind(('127.0.0.1', port))
         # ecouter les connexions
         sock.listen()
         # retourner le socket
@@ -48,7 +48,7 @@ def become_client(port):
         # creer un socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # connecter le socket
-        sock.connect((socket.gethostbyname(socket.gethostname()), port))
+        sock.connect((socket.gethostbyname(socket.gethostname()), port)) # Port to listen on (non-privileged ports are > 1023) ### netstat -an
         # retourner le socket
         return sock
     except:
