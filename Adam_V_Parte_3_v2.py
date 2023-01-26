@@ -4,7 +4,7 @@ import socket
 import threading
 import json
 from Adam_V_Parte_3_v1 import *
-from IA_GAME import *
+from IA_GAME_v1 import *
 
 #ajout de la gestion de mode de jeu, avec ia ou en resaux
 
