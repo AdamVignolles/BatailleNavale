@@ -71,7 +71,8 @@ def placer_bateaux_ia(grille_bateau_ia):
         grille_bateau_ia (type:list) : grille de bateau de l'ia
     """
     # placer les bateaux de l'ia
-    for j in range(2,6):
+    bateaux = [2, 3, 3, 4, 5]
+    for j in bateaux:
         sens = random.randint(0, 1)
         if sens == 0:
             # horizontal
