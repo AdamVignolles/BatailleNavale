@@ -8,6 +8,17 @@ import random
 
 #fonction du jeu contre l'ia
 def tour(grilles, current_player):
+    """Tour of the game
+
+    La methode permet de faire le tour du jeu
+
+    Args:
+        grilles (type:dict) : grilles du jeu
+        current_player (type:str) : joueur courant
+
+    Returns:
+        tir (type:int) : case tirer
+    """
     if current_player == "humain":
         print("tour: HUMAIN")
         print("bateaux:", grilles["humain"]["grille_bateau"])
@@ -49,6 +60,16 @@ def placer_bateaux(grille):
 
 
 def placer_bateaux_ia(grille_bateau_ia):
+    """Placer les bateaux de l'ia
+
+    La methode permet de placer les bateaux de l'ia
+
+    Args:
+        grille_bateau_ia (type:list) : grille de bateau de l'ia
+
+    Returns:
+        grille_bateau_ia (type:list) : grille de bateau de l'ia
+    """
     # placer les bateaux de l'ia
     for j in range(2,6):
         sens = random.randint(0, 1)
@@ -85,6 +106,16 @@ def placer_bateaux_ia(grille_bateau_ia):
 
 
 def change_current_player(current_player):
+    """Changer de joueur
+
+    La methode permet de changer de joueur
+
+    Args:
+        current_player (type:str) : joueur courant
+
+    Returns:
+        current_player (type:str) : joueur courant
+    """
     # changer de joueur
     if current_player == "humain":
         current_player = "ia"
@@ -93,6 +124,7 @@ def change_current_player(current_player):
     return current_player
 
 def formater_grille(grille):
+    # formater la grille pour l'affichage optimalement
     grille_formatee = ""
     for i in range(0, 10):
         grille_formatee += " ".join(grille[i * 10:i * 10 + 10]) + "\n"
@@ -107,6 +139,13 @@ def affiche_les_grilles(grilles):
     print("tir:\n", formater_grille(grilles["ia"]["grille_tir"]))
 
 def check_touche(grilles, current_player, tir):
+    """Verifier si le bateau est touché
+
+    Args:
+        grilles (type:dict) : dictionnaire contenant les grilles de bateaux et de tir
+        current_player (type:str) : joueur courant
+        tir (type:int) : position du tir
+    """
     current_player = change_current_player(current_player) # pour verifier si le bateau est touché par l'adversaire
     if grilles[current_player]["grille_bateau"][tir] == "b":
         print("bateau touché")
@@ -116,6 +155,14 @@ def check_touche(grilles, current_player, tir):
         grilles[current_player]["grille_bateau"][tir] = "O"
 
 def check_win(grilles):
+    """Verifier si le jeu est fini
+
+    Args:
+        grilles (type:dict) : dictionnaire contenant les grilles de bateaux et de tir
+
+    Returns:
+        bool: True si le jeu est fini, False sinon
+    """
     if grilles["humain"]["grille_bateau"].count("b") == 0:
         print("l'IA a gagné")
         return True
@@ -126,6 +173,13 @@ def check_win(grilles):
 
 
 def boucle_jeu(grilles, current_player):
+    """Boucle de jeu
+
+    Args:
+        grilles (type:dict) : dictionnaire contenant les grilles de bateaux et de tir
+        current_player (type:str) : joueur courant
+    """
+
     while True:
         # faire le tour
         tir = tour(grilles, current_player)
@@ -147,6 +201,7 @@ def boucle_jeu(grilles, current_player):
 
 
 def ia_game():
+    """Jeu contre l'IA"""
     grilles = {
         "humain": {
             "grille_bateau": [""]*100,

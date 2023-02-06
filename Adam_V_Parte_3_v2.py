@@ -9,6 +9,13 @@ from IA_GAME_v1 import *
 #ajout de la gestion de mode de jeu, avec ia ou en resaux
 
 def game_mode():
+    """Ask for the game mode
+
+    La methode demande le mode de jeu
+
+    Returns:
+        mode -> [type:str] : renvoie le mode de jeu
+    """
     mode = input("mode de jeu? ")
     if mode == "ia":
         ia_game()
@@ -17,5 +24,6 @@ def game_mode():
     else:
         print("mode de jeu invalide")
         game_mode()
-
-game_mode()
+        
+if __name__ == "__main__":
+    game_mode()
