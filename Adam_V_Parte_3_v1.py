@@ -2,7 +2,6 @@
 
 import socket
 import threading
-import json
 
 # gerer la partie resaux du jeu de la bataille naval
 
