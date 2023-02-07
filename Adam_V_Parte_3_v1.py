@@ -1,4 +1,4 @@
-#encoding: utf-8
+# Programmé par Adam Vignolles
 
 import socket
 import threading
