@@ -178,12 +178,12 @@ def partie_gagnee():
     tt.hideturtle()
     tt.done()
 
-def get_position_menu(x, y):
+def get_position_menu(x, y, type_menu):
     global POS_X_MENU_1, POS_Y_MENU_1, POS_X_MENU_2, POS_Y_MENU_2, LONGUEUR_MENU, HAUTEUR_MENU
     if x < POS_X_MENU_1 and x > POS_X_MENU_1 - LONGUEUR_MENU and y > POS_Y_MENU_1 and y < POS_Y_MENU_1 + HAUTEUR_MENU:
-        bn.choix_do("menu 1")
+        bn.choix_do("menu 1", type_menu)
     elif x > POS_X_MENU_2 and x < POS_X_MENU_2 + LONGUEUR_MENU and y > POS_Y_MENU_2 and y < POS_Y_MENU_2 + HAUTEUR_MENU:
-        bn.choix_do("menu 2")
+        bn.choix_do("menu 2", type_menu)
     
 def get_position_case(x, y):
     # On récupère la position de la case
@@ -195,11 +195,11 @@ def get_position_case(x, y):
     ###
 
 #methode pour recuperer la position de la souris
-def get_position_mouse(afterscreenclik):
+def get_position_mouse(afterscreenclik, type_of_click=None):
     if afterscreenclik == "position_case":
         tt.onscreenclick(lambda x, y: get_position_case(x,y))
     elif afterscreenclik == "position_menu":
-        tt.onscreenclick(lambda x, y: get_position_menu(x,y))
+        tt.onscreenclick(lambda x, y: get_position_menu(x,y, type_of_click))
     else:
         tt.onscreenclick(lambda x, y: print(x, y))
 
