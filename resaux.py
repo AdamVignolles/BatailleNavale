@@ -99,12 +99,20 @@ def wait_bateau(connexion):
         data = data.decode("utf-8")
         data = data.split("/")
         if data[0] == "grille_bateau":
-            grilles[data[1]]["grille_bateau"] = data[2]
+            # transformer chain data 2 en liste
+            data[2] = data[2].replace("[", "")
+            data[2] = data[2].replace("]", "")
+            data[2] = data[2].replace("'", "")
+            data[2] = data[2].replace(" ", "")
+            l = []
+            for i in data[2].split(","):
+                l.append(i)
+            grilles[data[1]]["grille_bateau"] = l
             break
 
 def genere_grille_bateau(joueur):
     global grilles
-    bateaux = [2, 3, 4, 5]
+    bateaux = [2, 2, 2, 2]
     grille_bateau = grilles[f'joueur{joueur}']['grille_bateau']
     for j in bateaux:
         sens = random.randint(0, 1)
@@ -164,20 +172,66 @@ def place_bateau(joueur, sock):
     boucle_de_jeu(joueur)  
 
 def boucle_de_jeu(joueur):
-    global sock
+    global sock, current_player
     current_player = 1
 
     while True:
         # envoyer le tour
+        print("envoyer tour")
         send_message(sock, "tour/" + str(current_player))
+        print("attendre tour")
         # attendre le tour
         data = listen_message(sock)
         if data[0] == "tour":
             current_player = int(data[1][0])
+            print(f"Tour du joueur {current_player}")
 
         #faire le tour
-        tir =  tour(grilles, current_player, joueur)
-        break
+        tir = tour(grilles, joueur)
+        if tir != None:
+            print(tir, "tir")
+            # send message
+            send_message(sock, "grille_tir/"+ f"joueur{current_player}/" + str(grilles[f"joueur{current_player}"]["grille_tir"]))
+
+
+        #recuperer la grille de tir
+        if current_player != joueur:
+            print("attendre grille_tir")
+            data = listen_message(sock)
+            print(data, "data tour joue par l'adversaire")
+            if data[0] == "grille_tir":
+                # transformer chain data 2 en liste
+                data[2] = data[2].replace("[", "")
+                data[2] = data[2].replace("]", "")
+                data[2] = data[2].replace("'", "")
+                data[2] = data[2].replace(" ", "")
+                l = []
+                for i in data[2].split(","):
+                    l.append(i)
+                grilles[data[1]]["grille_tir"] = l
+                print(grilles[data[1]]["grille_tir"], "tir joue par l'adversaire")
+
+
+
+        # changer le joueur courant
+
+        current_player = change_current_player(current_player)
+        print(current_player, "current_player")
+
+        # verifier si le joueur a gagner
+        if check_win(grilles) == "joueur1":
+            send_message(sock, "win/joueur1")
+            # recuperer le message
+            data = listen_message(sock)
+            if data[0] == "win":
+                if data[1] == f"joueur{joueur}":
+                    pg.partie_gagnee()
+                else:
+                    pg.partie_perdue()
+            break
+
+
+
 
 def change_current_player(current_player):
     """Change the current player .
@@ -197,91 +251,84 @@ def change_current_player(current_player):
     return current_player
 
 def verifie_si_toucher(grille, position):
-    if grille[position] == "b":
-        return True
-    else:
-        return False 
+    if position != None:
+        if grille[position] == "b":
+            return True
+        else:
+            return False 
 
 
 def affiche_grilles(grilles, joueur):
+    global current_player
     X_GRILLES_TIR = 500
     Y_GRILLES_TIR = -250
     X_GRILLES_BATEAU = -50
     Y_GRILLES_BATEAU = -250
     pg.grille(X_GRILLES_TIR, Y_GRILLES_TIR)
     pg.grille(X_GRILLES_BATEAU, Y_GRILLES_BATEAU)
+    pg.info_grille()
+    if joueur == current_player:
+        pg.info_tour("oui")
+    else:
+        pg.info_tour("non")
     autre_joueur = change_current_player(joueur)
-    grilles["joueur1"]["grille_bateau"] = grilles["joueur1"]["grille_bateau"][::-1]
-    grilles["joueur2"]["grille_bateau"] = grilles["joueur2"]["grille_bateau"][::-1]
+
     # afficher la grille des bateauxs
-    for i in range(0, 100):
-        if grilles[f"joueur{autre_joueur}"]["grille_tir"][i] == "t":
-            pg.croix(-(i//10), i%10, 'red', X_GRILLES_BATEAU, Y_GRILLES_BATEAU)
+    print(grilles[f"joueur{joueur}"]['grille_bateau'], "grille_bateauaaaaa")
+    for i in range(0, 100):            
         if grilles[f"joueur{joueur}"]['grille_bateau'][i] == "b":
-            pg.bateau(-(i//10), i%10)
+            pg.bateau((i%10)+1, (i//10)+1)
+        if grilles[f"joueur{autre_joueur}"]["grille_tir"][i] == "t":
+            pg.croix((i%10)+1, (i//10)+1, 'red', X_GRILLES_BATEAU, Y_GRILLES_BATEAU)
+        if grilles[f"joueur{autre_joueur}"]["grille_tir"][i] == "m":
+            pg.croix((i%10)+1, (i//10)+1, 'green', X_GRILLES_BATEAU, Y_GRILLES_BATEAU)
     # afficher la grille des tirs
     for i in range(0, 100):
         if grilles[f"joueur{joueur}"]["grille_tir"][i] == "t":
-            pg.croix(-(i//10), i%10, 'red', X_GRILLES_TIR, Y_GRILLES_TIR)
+            pg.croix((i%10)+1, (i//10)+1, 'green', X_GRILLES_TIR, Y_GRILLES_TIR)
         if grilles[f"joueur{joueur}"]["grille_tir"][i] == "m":
-            pg.croix(-(i//10), i%10, 'blue', X_GRILLES_TIR, Y_GRILLES_TIR)
+            pg.croix((i%10)+1, (i//10)+1,  'red', X_GRILLES_TIR, Y_GRILLES_TIR)
     
 
-def case_choisie(x, y, grilles, joueur):
-    global sock
-    if x != None and y != None:
-        n_case = x + y * 10
-        grilles[f"joueur{joueur}"]["grille_tir"][n_case] = "t"
-
-        send_message(sock, f"grille_tir/joueur{joueur}/" + str(n_case))
-
-        autre_joueur = change_current_player(joueur)
-        # recuperer message 
-        
-        data = listen_message(sock)
-        print(data, joueur)
-        if data[0] == "grille_tir":
-            if verifie_si_toucher(grilles, n_case):
-                grilles[f"joueur{autre_joueur}"]["grille_bateau"][n_case] = "t"
-
-        tour(grilles, joueur, joueur, n_case)
-
-
 def check_win(grilles):
-    if grilles["joueur1"]["grille_bateau"].count("t") == 17:
+    if grilles["joueur1"]["grille_bateau"].count("t") == 8:
         return "joueur1 a gagné"
-    elif grilles["joueur2"]["grille_bateau"].count("t") == 17:
+    elif grilles["joueur2"]["grille_bateau"].count("t") == 8:
         return "joueur2 a gagné"
     else:
         return False
 
-def tour(grilles, current_player, joueur, tir=None):
-
+def tour(grilles, joueur, tir=None):
+    global current_player
     pg.blue_screen()
     # afficher les grilles
     affiche_grilles(grilles, joueur)
 
     #faire le tir
-    pg.get_position_mouse("position_case")
+    if joueur == current_player:
+        while True:
+            tir = pg.get_tir()
+            if "," in tir:
+                tir = tir.split(",")
+                x = int(tir[0]) -1
+                y = int(tir[1]) -1
+                if x >= 0 or x <= 10 or y >= 0 or y <= 10:
+                    tir = x + y * 10
+                    break
 
-    current_player = change_current_player(current_player)
+        print(grilles[f"joueur{change_current_player(joueur)}"]["grille_bateau"], "grille_bateau")
+        print(grilles[f"joueur{change_current_player(joueur)}"]["grille_bateau"][tir],"tirrrr")
+        if grilles[f"joueur{change_current_player(joueur)}"]["grille_bateau"][tir] == "b":
+            grilles[f"joueur{joueur}"]["grille_tir"][tir] = "t"
+            print("touche")
+        else:
+            grilles[f"joueur{joueur}"]["grille_tir"][tir] = "m"
+            print("manque")
 
-    # verifier si le tir est un touche ou un manque
-    if verifie_si_toucher(grilles, tir):
-        grilles["grille_tir"][tir] = "t"
-        
-        pg.croix(-(tir//10), tir%10, 'red', 500, -250)
+        return tir
     else:
-        grilles["grille_tir"][tir] = "m"
-        pg.croix(-(tir//10), tir%10, 'blue', 500, -250)
-    
-    if check_win(grilles) == f"joueur{joueur} a gagné":
-        pg.blue_screen()
-        pg.win()
-
-    elif check_win(grilles) == f"joueur{change_current_player(joueur)} a gagné":
-        pg.blue_screen()
-        pg.lose()
+        print("autre joueur")
+        return None
 
     
 
