@@ -2,6 +2,7 @@
 
 import turtle as tt
 import BatailleNavale as bn
+import resaux
 tt.hideturtle()
 
 
@@ -60,10 +61,10 @@ def grille (x,y) :           #Crée une grill de 10X10 100 cases total et on y r
     tt.hideturtle()
     
  
-def croix (x,y,color) :                               #Crée une croix avec comme millieux les coordonné (x,y) et prend comme autre argument la couleur de la croix
+def croix (x,y,color, POSE_X_TABELAU, POSE_Y_TABLEAU) :                               #Crée une croix avec comme millieux les coordonné (x,y) et prend comme autre argument la couleur de la croix
     """ Crée une croix avec comme millieux les coordonné (x,y)int et prend comme autre argument la couleur de la croix en str  """
     tt.up()
-    tt.goto(0,0)
+    tt.goto(x*50-abs(POSE_X_TABLEAU)-longueur_case/2,y*50-abs(POSE_Y_TABLEAU)+longueur_case/2)
     tt.down()
     tt.setheading(0)
     tt.color(color)
@@ -76,31 +77,24 @@ def croix (x,y,color) :                               #Crée une croix avec comm
     tt.color("black")
     tt.hideturtle()
     
-def bateau(x,y,ori,taille) :                        #crée un bateau de "taille"(a entré dans la fonction) cases de longueur et de 1 de largeur ,prend comme coordonné (x,y) le millieux du bateau et ori est égal a l'orientation soit "vertical" ou "horrizontale" et return false si quelque chose d'autre est inseré 
+def bateau(x,y) :                        #crée un bateau de "taille"(a entré dans la fonction) cases de longueur et de 1 de largeur ,prend comme coordonné (x,y) le millieux du bateau et ori est égal a l'orientation soit "vertical" ou "horrizontale" et return false si quelque chose d'autre est inseré 
     """#crée un bateau de "taille"(a entré dans la fonction) cases de longueur et de 1 de largeur ,prend comme coordonné (x,y)int le millieux du bateau et ori est égal a l'orientation soit "vertical" ou "horrizontale" en str et return false si quelque chose d'autre est inseré """
-    if ori=="vertical": ori=90
-    elif  ori =="horrizontale" : ori=0
-    else : return False
+    #aller a la coordonné (x,y)
     tt.up()
-    tt.color("gray")
+    tt.goto(x*50-abs(POSE_X_TABLEAU),y*50-abs(POSE_Y_TABLEAU))
+    tt.down()
     tt.speed(0)
-    tt.setheading(0)
-    tt.goto(x,y)
-    tt.left(ori)
-    tt.backward(longueur_case/10*3*taille)
+    # couleur grise
+    tt.color("grey")
+    #faire un carré de la taille de la case en son centre
     tt.begin_fill()
     tt.right(90)
-    tt.down()
-    tt.forward(longueur_case/10*3)
+    for i in range (4):
+        tt.forward(longueur_case)
+        tt.right(90)
     tt.left(90)
-    tt.forward(longueur_case/5*3*taille)
-    tt.circle(longueur_case/10*3,180)
-    tt.forward(longueur_case/5*3*taille)
-    tt.left(90)
-    tt.forward(longueur_case/10*3)
     tt.end_fill()
-    tt.color("black")
-    tt.hideturtle()
+    tt.up()
 
 def get_code():                           #Permet d'obtenir le code pour le port multijoueur
     """#Permet d'obtenir le code pour le port multijoueur en int """
@@ -185,23 +179,66 @@ def get_position_menu(x, y, type_menu):
     elif x > POS_X_MENU_2 and x < POS_X_MENU_2 + LONGUEUR_MENU and y > POS_Y_MENU_2 and y < POS_Y_MENU_2 + HAUTEUR_MENU:
         bn.choix_do("menu 2", type_menu)
     
-def get_position_case(x, y):
+def get_position_case(x, y, grilles, joueur):
     # On récupère la position de la case
     x = int(abs(x - POSE_X_TABLEAU) // longueur_case)
     y = int(abs(y - POSE_Y_TABLEAU) // longueur_case)
-    print(x, y)
+    
     ###
-    # icic appeler la fonction croix
+    if x < 0 or x > 9 or y < 0 or y > 9:
+        return
+    
+    resaux.case_choisie(x, y, grilles, joueur)
     ###
 
 #methode pour recuperer la position de la souris
-def get_position_mouse(afterscreenclik, type_of_click=None):
+def get_position_mouse(afterscreenclik, type_of_click=None, grilles=None, joueur=None):
     if afterscreenclik == "position_case":
-        tt.onscreenclick(lambda x, y: get_position_case(x,y))
+        tt.onscreenclick(lambda x, y: get_position_case(x,y, grilles, joueur))
     elif afterscreenclik == "position_menu":
         tt.onscreenclick(lambda x, y: get_position_menu(x,y, type_of_click))
     else:
         tt.onscreenclick(lambda x, y: print(x, y))
+
+def attente_joueur():
+    tt.up()
+    tt.reset()
+    tt.goto(-350,0)
+    tt.write("En atente d'un joueur",font=("Verdana",50, "normal"))
+
+def info_grille():          #Fonction qui marque en bas des grille a quoi elle correspond "Vos Bateau" et "Vos Tirs"
+    """fonction qui marque en bas des grille a quoi elle correspond "Vos Bateau" et "Vos Tirs et ne demende rien """
+    tt.up()
+    tt.goto(-300,-280)
+    tt.write("Vos Bateaux",font=("Verdana",10, "normal"))
+    tt.goto(280,-280)
+    tt.write("Vos Tirs",font=("Verdana",10, "normal"))
+    tt.hideturtle()
+    
+def joueur_tour(le_tour):   #Fonction qui est utilisé dans celle cidessous pour reduir le code
+    tt.up()
+    tt.goto(-100,350)
+    tt.color("blue")
+    tt.speed(0)
+    tt.down()
+    tt.begin_fill()
+    tt.goto(-100,260)
+    tt.goto(100,260)
+    tt.goto(100,350)
+    tt.goto(-100,350)
+    tt.end_fill()
+    tt.goto(-100,300)
+    tt.color("black")
+    tt.write(le_tour,font=("Verdana",15, "normal"))
+    tt.hideturtle()
+    
+def info_tour(reponse):    #Fonction qui permet de changer l'affichage du tour entre "c'est a vous et "pas a vous" pour indiqué qui dois jouer
+    """Fonction qui permet de changer l'affichage du tour entre "c'est a vous et "pas a vous" pour indiqué qui dois jouer en prenant des str "oui" ou "non" et changer la reponse "oui"="c'est a vous" et "non"="pas a vousde jouer" """
+    tt.up()
+    if reponse=="oui":
+        joueur_tour("C'est votre tour")
+    elif reponse=="non":
+        joueur_tour("pas a vous de jouer")
 
 """Valeur mutable importante en pixel et permet de modifier la taille des case du tableau et de toutes les autre fonction graphique du"""
 longueur_case = 50
@@ -215,17 +252,26 @@ HAUTEUR_MENU = 75
 
 choix = [""]
 
-
+# grille de batteaux
 POSE_Y_TABLEAU = -250
-POSE_X_TABLEAU = -250
+POSE_X_TABLEAU = -50
+
+# grille de tir
+POSE_Y_TABLEAU_TIR = 500
+POSE_X_TABLEAU_TIR = -250
+
+
+
 
 
 
 if __name__ == "__main__":
 
-    
-    get_position_mouse("position_menu")
+    grille(POSE_X_TABLEAU, POSE_Y_TABLEAU)
 
-    menu_selection("mode de jeu?", 'ia', 'resaux')
+    bateau(-1, 1)
+    croix(-1,0, "red", POSE_X_TABLEAU, POSE_Y_TABLEAU)
+    tt.mainloop()
+    
 
     

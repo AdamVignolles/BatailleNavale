@@ -30,21 +30,20 @@ def become_server(port):
         port (type:int) : port du serveur 
 
     """
-    try : 
-        # creer un socket
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # bind le socket
-        sock.bind(('127.0.0.1', port))
-        # ecouter les connexions
-        sock.listen()
-        #pg.attente("En attente d'un joueur")
-        # accepter les connexions
-        sock, infos_connexion = sock.accept()
-        # place les bateaux
-        joueur = 1
-        place_bateau(joueur, sock)
-    except:
-        pass
+    global sock
+    # creer un socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # bind le socket
+    sock.bind(('127.0.0.1', port))
+    # ecouter les connexions
+    sock.listen()
+    pg.attente_joueur()
+    # accepter les connexions
+    sock, infos_connexion = sock.accept()
+    # place les bateaux
+    joueur = 1
+    place_bateau(joueur, sock)
+
 
 # method devenir un client
 def become_client(port):
@@ -56,16 +55,14 @@ def become_client(port):
         port (type:int) : port du serveur
 
     """
-    try:
-        # creer un socket
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # connecter le socket
-        sock.connect(("127.0.0.1", port)) # Port to listen on (non-privileged ports are > 1023) ### netstat -an
-        # place les bateaux
-        joueur = 2
-        place_bateau(joueur, sock)
-    except:
-        pass
+    global sock
+    # creer un socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # connecter le socket
+    sock.connect(("127.0.0.1", port)) # Port to listen on (non-privileged ports are > 1023) ### netstat -an
+    # place les bateaux
+    joueur = 2
+    place_bateau(joueur, sock)
 
 # method envoyer un message
 def send_message(connexion, message):
@@ -107,7 +104,7 @@ def wait_bateau(connexion):
 
 def genere_grille_bateau(joueur):
     global grilles
-    bateaux = [2, 3, 3, 4, 5]
+    bateaux = [2, 3, 4, 5]
     grille_bateau = grilles[f'joueur{joueur}']['grille_bateau']
     for j in bateaux:
         sens = random.randint(0, 1)
@@ -164,9 +161,10 @@ def place_bateau(joueur, sock):
                 break
 
     # lancer la boucle de jeu 
-    boucle_de_jeu(joueur, sock)  
+    boucle_de_jeu(joueur)  
 
-def boucle_de_jeu(joueur, sock):
+def boucle_de_jeu(joueur):
+    global sock
     current_player = 1
 
     while True:
@@ -178,15 +176,116 @@ def boucle_de_jeu(joueur, sock):
             current_player = int(data[1][0])
 
         #faire le tour
-        tir =  tour(grilles[f"joueur{current_player}"], current_player, joueur)
+        tir =  tour(grilles, current_player, joueur)
+        break
 
-def tour(grille, current_player, joueur):
+def change_current_player(current_player):
+    """Change the current player .
+
+    La methode permet de changer le joueur courant
+
+    Args:
+        current_player (type:int) : numero du joueur
+
+    Returns:
+        current_player (type:int) : numero du joueur
+    """
+    if current_player == 1:
+        current_player = 2
+    else:
+        current_player = 1
+    return current_player
+
+def verifie_si_toucher(grille, position):
+    if grille[position] == "b":
+        return True
+    else:
+        return False 
+
+
+def affiche_grilles(grilles, joueur):
+    X_GRILLES_TIR = 500
+    Y_GRILLES_TIR = -250
+    X_GRILLES_BATEAU = -50
+    Y_GRILLES_BATEAU = -250
+    pg.grille(X_GRILLES_TIR, Y_GRILLES_TIR)
+    pg.grille(X_GRILLES_BATEAU, Y_GRILLES_BATEAU)
+    autre_joueur = change_current_player(joueur)
+    grilles["joueur1"]["grille_bateau"] = grilles["joueur1"]["grille_bateau"][::-1]
+    grilles["joueur2"]["grille_bateau"] = grilles["joueur2"]["grille_bateau"][::-1]
+    # afficher la grille des bateauxs
+    for i in range(0, 100):
+        if grilles[f"joueur{autre_joueur}"]["grille_tir"][i] == "t":
+            pg.croix(-(i//10), i%10, 'red', X_GRILLES_BATEAU, Y_GRILLES_BATEAU)
+        if grilles[f"joueur{joueur}"]['grille_bateau'][i] == "b":
+            pg.bateau(-(i//10), i%10)
+    # afficher la grille des tirs
+    for i in range(0, 100):
+        if grilles[f"joueur{joueur}"]["grille_tir"][i] == "t":
+            pg.croix(-(i//10), i%10, 'red', X_GRILLES_TIR, Y_GRILLES_TIR)
+        if grilles[f"joueur{joueur}"]["grille_tir"][i] == "m":
+            pg.croix(-(i//10), i%10, 'blue', X_GRILLES_TIR, Y_GRILLES_TIR)
+    
+
+def case_choisie(x, y, grilles, joueur):
+    global sock
+    if x != None and y != None:
+        n_case = x + y * 10
+        grilles[f"joueur{joueur}"]["grille_tir"][n_case] = "t"
+
+        send_message(sock, f"grille_tir/joueur{joueur}/" + str(n_case))
+
+        autre_joueur = change_current_player(joueur)
+        # recuperer message 
+        
+        data = listen_message(sock)
+        print(data, joueur)
+        if data[0] == "grille_tir":
+            if verifie_si_toucher(grilles, n_case):
+                grilles[f"joueur{autre_joueur}"]["grille_bateau"][n_case] = "t"
+
+        tour(grilles, joueur, joueur, n_case)
+
+
+def check_win(grilles):
+    if grilles["joueur1"]["grille_bateau"].count("t") == 17:
+        return "joueur1 a gagné"
+    elif grilles["joueur2"]["grille_bateau"].count("t") == 17:
+        return "joueur2 a gagné"
+    else:
+        return False
+
+def tour(grilles, current_player, joueur, tir=None):
 
     pg.blue_screen()
-    # afficher la grille des tirs
-    X_GRILLES_TIR = 0
-    Y_GRILLES_TIR = 0
-    pg.grille(X_GRILLES_TIR, Y_GRILLES_TIR)
+    # afficher les grilles
+    affiche_grilles(grilles, joueur)
+
+    #faire le tir
+    pg.get_position_mouse("position_case")
+
+    current_player = change_current_player(current_player)
+
+    # verifier si le tir est un touche ou un manque
+    if verifie_si_toucher(grilles, tir):
+        grilles["grille_tir"][tir] = "t"
+        
+        pg.croix(-(tir//10), tir%10, 'red', 500, -250)
+    else:
+        grilles["grille_tir"][tir] = "m"
+        pg.croix(-(tir//10), tir%10, 'blue', 500, -250)
+    
+    if check_win(grilles) == f"joueur{joueur} a gagné":
+        pg.blue_screen()
+        pg.win()
+
+    elif check_win(grilles) == f"joueur{change_current_player(joueur)} a gagné":
+        pg.blue_screen()
+        pg.lose()
+
+    
+
+
 # method resaux_game
 def resaux_game(): 
     global grilles
