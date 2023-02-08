@@ -1,8 +1,10 @@
 #Programé par Lenny Cohen 1G5
 
 import turtle as tt
-import BatailleNavale as bn
 tt.hideturtle()
+
+"""Valeur mutable importante en pixel et permet de modifier la taille des case du tableau et de toutes les autre fonction graphique du"""
+longueur_case = 50
 
 
 
@@ -117,10 +119,7 @@ def menu_selection(name,name1,name2) :
     tt.write(name1,font=("Verdana",50, "normal"))
     tt.goto(100,-100)
     tt.write(name2,font=("Verdana",50, "normal"))
-    tt.hideturtle() 
-
-         
-
+    tt.hideturtle()  
     
 def partie_perdu() :
     """#fonction lorsque que la partie est perdu  , écris "Loose" puis un "retry" sous un fond noir"""                            #fonction lorsque que la partie est perdu  , écris "Loose" puis un "retry" sous un fond noir 
@@ -177,13 +176,14 @@ def partie_gagnee():
     tt.write("Retry?",font=("Verdana",100, "normal"))
     tt.hideturtle()
     tt.done()
-
+    
 def get_position_menu(x, y):
     global POS_X_MENU_1, POS_Y_MENU_1, POS_X_MENU_2, POS_Y_MENU_2, LONGUEUR_MENU, HAUTEUR_MENU
     if x < POS_X_MENU_1 and x > POS_X_MENU_1 - LONGUEUR_MENU and y > POS_Y_MENU_1 and y < POS_Y_MENU_1 + HAUTEUR_MENU:
-        bn.choix_do("menu 1")
+        print("menu 1")
     elif x > POS_X_MENU_2 and x < POS_X_MENU_2 + LONGUEUR_MENU and y > POS_Y_MENU_2 and y < POS_Y_MENU_2 + HAUTEUR_MENU:
-        bn.choix_do("menu 2")
+        print("menu 2")
+    
     
 def get_position_case(x, y):
     # On récupère la position de la case
@@ -191,7 +191,7 @@ def get_position_case(x, y):
     y = int(abs(y - POSE_Y_TABLEAU) // longueur_case)
     print(x, y)
     ###
-    # icic appeler la fonction croix
+    # ici appeler la fonction croix
     ###
 
 #methode pour recuperer la position de la souris
@@ -202,30 +202,29 @@ def get_position_mouse(afterscreenclik):
         tt.onscreenclick(lambda x, y: get_position_menu(x,y))
     else:
         tt.onscreenclick(lambda x, y: print(x, y))
-
-"""Valeur mutable importante en pixel et permet de modifier la taille des case du tableau et de toutes les autre fonction graphique du"""
-longueur_case = 50
-
-POS_X_MENU_1 = -160
-POS_Y_MENU_1 = -100
-POS_X_MENU_2 = 90
-POS_Y_MENU_2 = -100
-LONGUEUR_MENU = 250
-HAUTEUR_MENU = 75
-
-choix = [""]
-
-
-POSE_Y_TABLEAU = -250
-POSE_X_TABLEAU = -250
-
-
-
+        
 if __name__ == "__main__":
 
-    
-    get_position_mouse("position_menu")
+    """Valeur mutable importante en pixel et permet de modifier la taille des case du tableau et de toutes les autre fonction graphique du"""
 
+    POS_X_MENU_1 = -160
+    POS_Y_MENU_1 = -100
+    POS_X_MENU_2 = 90
+    POS_Y_MENU_2 = -100
+    LONGUEUR_MENU = 250
+    HAUTEUR_MENU = 75
+
+    POSE_Y_TABLEAU = 0
+    POSE_X_TABLEAU = 0
+    get_position_mouse()
+    
     menu_selection("mode de jeu?", 'ia', 'resaux')
 
-    
+
+
+
+
+
+
+
+
