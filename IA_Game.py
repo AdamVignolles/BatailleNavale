@@ -7,6 +7,17 @@ import random
 import partie_graphique as pg
 
 def genere_grille_bateau(grilles, joueur):
+    """Genere la grille de bateau
+
+    La methode genere la grille de bateau
+
+    Args:
+        grilles (type:dict) : grilles du jeu
+        joueur (type:str) : joueur courant
+
+    Returns:
+        grille_bateau (type:list) : grille de bateau
+    """
     bateaux = [2, 3, 4, 5]
     grille_bateau = grilles[joueur]['grille_bateau']
     for j in bateaux:
@@ -61,6 +72,17 @@ def change_current_player(current_player):
     return current_player
 
 def affiche_grilles(grilles, joueur, current_player):
+    """Afficher les grilles
+
+    La methode permet d'afficher les grilles
+
+    Args:
+        grilles (type:dict) : dictionnaire contenant les grilles
+        joueur (type:str) : joueur courant
+
+    Returns:
+        None
+    """
     X_GRILLES_TIR = 500
     Y_GRILLES_TIR = -250
     X_GRILLES_BATEAU = -50
@@ -72,15 +94,15 @@ def affiche_grilles(grilles, joueur, current_player):
         pg.info_tour("oui")
     else:
         pg.info_tour("non")
-
+    
     # afficher la grille des bateauxs
     for i in range(0, 100):            
         if grilles["humain"]['grille_bateau'][i] == "b":
             pg.bateau((i%10)+1, (i//10)+1)
         if grilles["ia"]["grille_tir"][i] == "t":
-            pg.croix((i%10)+1, (i//10)+1, 'red', X_GRILLES_BATEAU, Y_GRILLES_BATEAU)
-        if grilles["ia"]["grille_tir"][i] == "m":
             pg.croix((i%10)+1, (i//10)+1, 'green', X_GRILLES_BATEAU, Y_GRILLES_BATEAU)
+        if grilles["ia"]["grille_tir"][i] == "m":
+            pg.croix((i%10)+1, (i//10)+1, 'red', X_GRILLES_BATEAU, Y_GRILLES_BATEAU)
     # afficher la grille des tirs
     for i in range(0, 100):
         if grilles["humain"]["grille_tir"][i] == "t":
@@ -128,8 +150,8 @@ def tour(grilles, current_player):
         return tir
     else:
         # tour de l'ia
-        x = random.randint(0, 10)
-        y = random.randint(0, 10)
+        x = random.randint(0, 10) - 1
+        y = random.randint(0, 10) - 1
         tir = x + y * 10
         return tir
 

@@ -61,13 +61,14 @@ def grille (x,y) :           #Crée une grill de 10X10 100 cases total et on y r
     tt.hideturtle()
     grille_info(x,y)
 
-def grille_info(x,y):               #Donne des info sur la grille avec les chifre a coé de chaque case
+def grille_info(x,y):               #Donne des info sur la grille avec les chifre a coté de chaque case
     tt.up()
     tt.speed(0)
     tt.goto(x,y)
     tt.setheading(0)
-    tt.backward(longueur_case*10+10)
+    tt.backward(longueur_case*10+20)
     tt.left(90)
+    tt.backward(longueur_case/2+5)
     for i in range (10):
         tt.forward(longueur_case)
         tt.write(10-i,font=("Verdana",10, "normal"))
@@ -82,7 +83,7 @@ def grille_info(x,y):               #Donne des info sur la grille avec les chifr
     
  
 def croix (x,y,color, tab_x, tab_y) :                               #Crée une croix avec comme millieux les coordonné (x,y) et prend comme autre argument la couleur de la croix
-    """ Crée une croix avec comme millieux les coordonné (x,y)int et prend comme autre argument la couleur de la croix en str  """
+    """ Crée une croix avec comme millieux les coordonné (x,y)int et prend comme autre argument la couleur de la croix en str et les coordonné du tableau """
     if tab_x <0:
         X = -((10-x+3)*longueur_case-abs(tab_x)-longueur_case/2)
         Y = -((y-1)*longueur_case-abs(tab_y)+longueur_case/2)
@@ -93,6 +94,7 @@ def croix (x,y,color, tab_x, tab_y) :                               #Crée une c
     tt.goto(X,Y)
     tt.down()
     tt.setheading(0)
+    tt.width(5)
     tt.color(color)
     tt.speed(0)
     tt.right(45)
@@ -102,6 +104,7 @@ def croix (x,y,color, tab_x, tab_y) :                               #Crée une c
         tt.right(90)
     tt.left(45)
     tt.color("black")
+    tt.width(1)
     tt.hideturtle()
     
 def bateau(x,y) :                        #crée un bateau de "taille"(a entré dans la fonction) cases de longueur et de 1 de largeur ,prend comme coordonné (x,y) le millieux du bateau et ori est égal a l'orientation soit "vertical" ou "horrizontale" et return false si quelque chose d'autre est inseré 
@@ -234,8 +237,8 @@ def get_position_mouse(afterscreenclik, type_of_click=None, grilles=None, joueur
         tt.onscreenclick(lambda x, y: print(x, y))
 
 def attente_joueur():
-    tt.up()
     tt.reset()
+    tt.up()
     tt.goto(-350,0)
     tt.write("En atente d'un joueur",font=("Verdana",50, "normal"))
 
@@ -303,6 +306,8 @@ POSE_X_TABLEAU_TIR = 500
 
 
 if __name__ == "__main__":
+    
+    blue_screen()
 
     grille(POSE_X_TABLEAU, POSE_Y_TABLEAU)
 

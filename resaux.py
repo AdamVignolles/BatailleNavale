@@ -111,6 +111,16 @@ def wait_bateau(connexion):
             break
 
 def genere_grille_bateau(joueur):
+    """Generate the grid of the ships .
+
+    La methode genere la grille des bateaux
+
+    Args:
+        joueur (type:int): numero du joueur
+
+    Returns:
+        grille_bateau -> [type:list] : renvoie la grille des bateaux
+    """
     global grilles
     bateaux = [2, 3, 4, 5]
     grille_bateau = grilles[f'joueur{joueur}']['grille_bateau']
@@ -147,6 +157,14 @@ def genere_grille_bateau(joueur):
                     grille_bateau[position - k * 10] = "b"
 
 def place_bateau(joueur, sock):
+    """Place the ships .
+
+    La methode place les bateaux du joueur
+
+    Args:
+        joueur (type:int): numero du joueur
+        sock (type:socket): socket du serveur
+    """
 
     thread = threading.Thread(target=wait_bateau, args=(sock,))
     thread.start()
@@ -172,6 +190,13 @@ def place_bateau(joueur, sock):
     boucle_de_jeu(joueur)  
 
 def boucle_de_jeu(joueur):
+    """Boucle de jeu .
+
+    La methode permet de faire le tour des joueurs
+
+    Args:
+        joueur (type:int): numero du joueur
+    """
     global sock, current_player
     current_player = 1
 
@@ -243,6 +268,19 @@ def change_current_player(current_player):
     return current_player
 
 def verifie_si_toucher(grille, position):
+    """Verifie si le joueur a touche un bateau.
+
+    La methode permet de verifier si le joueur a touche un bateau
+
+    Args:
+        grille (type:dict) : grille du joueur
+        position (type:int) : position du joueur
+
+    Returns:
+        True si le joueur a touche un bateau
+        False si le joueur n'a pas touche un bateau
+    """
+
     if position != None:
         if grille[position] == "b":
             return True
@@ -251,6 +289,17 @@ def verifie_si_toucher(grille, position):
 
 
 def affiche_grilles(grilles, joueur):
+    """Affiche les grilles de jeu.
+
+    La methode permet d'afficher les grilles de jeu
+
+    Args:
+        grilles (type:dict) : dictionnaire des grilles
+        joueur (type:int) : numero du joueur
+
+    Returns:
+        None
+    """
     global current_player
     X_GRILLES_TIR = 500
     Y_GRILLES_TIR = -250
@@ -282,6 +331,15 @@ def affiche_grilles(grilles, joueur):
     
 
 def check_win(grilles):
+    """Check if a player has won the game
+
+    args:
+        grilles (type:dict): contains the grids of the players
+
+    returns:
+        str: "joueur1" or "joueur2" if a player has won the game
+        False: if no player has won the game
+    """
     if grilles["joueur1"]["grille_bateau"].count("t") == 8:
         return "joueur1 a gagné"
     elif grilles["joueur2"]["grille_bateau"].count("t") == 8:
@@ -290,6 +348,18 @@ def check_win(grilles):
         return False
 
 def tour(grilles, joueur, tir=None):
+    """AI is creating summary for tour
+
+
+
+    Args:
+        grilles ([type:list]): contient les grilles des joueurs
+        joueur ([type:int]): numero du joueur
+        tir ([type:int], optional): position du tir. Defaults to None.
+
+    Returns:
+        [type:list]: contient les grilles des joueurs
+    """
     global current_player
     pg.blue_screen()
     # afficher les grilles
@@ -321,6 +391,7 @@ def tour(grilles, joueur, tir=None):
 
 # method resaux_game
 def resaux_game(): 
+    """AI is creating summary for resaux_game """
     global grilles
     grilles = {"joueur1": {"grille_bateau": [""]*100, "grille_tir": [""]*100}, "joueur2": {"grille_bateau": [""]*100, "grille_tir": [""]*100}}
     ask_for_be_server_client()
