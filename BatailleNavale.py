@@ -7,7 +7,6 @@ import IA_Game as ia
 import turtle as tt
 
 def choix_do(choix, type_choix):
-    print(choix)
     if type_choix == "mode_de_jeu":
         if choix != "":
             if choix == "menu 1":
