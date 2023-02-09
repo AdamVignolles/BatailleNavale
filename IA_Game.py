@@ -83,10 +83,7 @@ def affiche_grilles(grilles, joueur, current_player):
     Returns:
         None
     """
-    X_GRILLES_TIR = 500
-    Y_GRILLES_TIR = -250
-    X_GRILLES_BATEAU = -50
-    Y_GRILLES_BATEAU = -250
+    
     pg.grille(X_GRILLES_TIR, Y_GRILLES_TIR)
     pg.grille(X_GRILLES_BATEAU, Y_GRILLES_BATEAU)
     pg.info_grille()
@@ -110,7 +107,7 @@ def affiche_grilles(grilles, joueur, current_player):
         if grilles["humain"]["grille_tir"][i] == "m":
             pg.croix((i%10)+1, (i//10)+1,  'red', X_GRILLES_TIR, Y_GRILLES_TIR)
 
-def check_win(grilles, joueur):
+def check_win(grilles):
     """Verifie si le joueur a gagne
 
     Args:
@@ -120,8 +117,10 @@ def check_win(grilles, joueur):
     Returns:
         (type:bool) : True si le joueur a gagne, False sinon
     """
-    if grilles[joueur]["grille_bateau"].count("t") == 14:
-        return True
+    if grilles["humain"]["grille_tir"].count("t") == 14:
+        return "humain"
+    elif grilles["ia"]["grille_tir"].count("t") == 14:
+        return "ia"
     else:
         return False
 
@@ -132,9 +131,7 @@ def tour(grilles, current_player):
         grilles (type:dict) : dictionnaire contenant les grilles de bateaux et de tir
         current_player (type:str) : joueur courant
     """
-    pg.blue_screen()
-
-    affiche_grilles(grilles, current_player, current_player)
+   
     # tour du joueur courant
     if current_player == "humain":
         # tour du joueur
@@ -162,26 +159,56 @@ def boucle_jeu(grilles, current_player):
         grilles (type:dict) : dictionnaire contenant les grilles de bateaux et de tir
         current_player (type:str) : joueur courant
     """
+    pg.blue_screen()
+
+    affiche_grilles(grilles, current_player, current_player)
+
     while True:
         # faire le tour
         tir = tour(grilles, current_player)
 
         # modifie grille et si touche
+        last_grille_tir = grilles[current_player]["grille_tir"].copy()
         if grilles[change_current_player(current_player)]["grille_bateau"][tir] == "b":
             grilles[current_player]["grille_bateau"][tir] = "t"
             grilles[current_player]["grille_tir"][tir] = "t"
         else:
             grilles[current_player]["grille_tir"][tir] = "m"
 
+        if current_player == "humain":
+            for i in range(0, 100):
+                
+                if grilles["humain"]["grille_tir"][i] != last_grille_tir[i]:
+                    case = i
+                    x = (case % 10) +1
+                    y = (case // 10) +1
+                    if grilles["humain"]["grille_tir"][i] == "t":
+                        pg.croix(x, y, "green", X_GRILLES_TIR, Y_GRILLES_TIR)
+                    elif grilles["humain"]["grille_tir"][i] == "m":
+                        pg.croix(x, y, "red", X_GRILLES_TIR, Y_GRILLES_TIR)
+                    break
+        else:
+            for i in range(0, 100):
+                if grilles["ia"]["grille_tir"][i] != last_grille_tir[i]:
+                    case = i
+                    x = (case % 10) +1
+                    y = (case // 10) +1
+                    if grilles["ia"]["grille_tir"][i] == "t":
+                        pg.croix(x, y, "green", X_GRILLES_BATEAU, Y_GRILLES_BATEAU)
+                    elif grilles["ia"]["grille_tir"][i] == "m":
+                        pg.croix(x, y, "red", X_GRILLES_BATEAU, Y_GRILLES_BATEAU)
+                    break
+
         # check si le joueur a gagne
-        if check_win(grilles, current_player):
-            break
+        if check_win(grilles, ) == "humain" : pg.partie_gagnee()
+        elif check_win(grilles) == "ia" : pg.partie_perdu()
 
         # change le joueur courant
         current_player = change_current_player(current_player)
 
 def ia_game():
     """Jeu contre l'IA"""
+    global X_GRILLES_BATEAU, Y_GRILLES_BATEAU, X_GRILLES_TIR, Y_GRILLES_TIR
     grilles = {
         "humain": {
             "grille_bateau": [""]*100,
@@ -193,6 +220,11 @@ def ia_game():
         }
     }
     current_player = "humain"
+
+    X_GRILLES_TIR = 500
+    Y_GRILLES_TIR = -250
+    X_GRILLES_BATEAU = -50
+    Y_GRILLES_BATEAU = -250
 
     # placer les bateaux de l'ia
     grilles["ia"]["grille_bateau"] = genere_grille_bateau(grilles, "ia")

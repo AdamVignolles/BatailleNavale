@@ -200,6 +200,10 @@ def boucle_de_jeu(joueur):
     global sock, current_player
     current_player = 1
 
+    pg.blue_screen()
+    # afficher les grilles
+    affiche_grilles(grilles, joueur)
+
     while True:
         # envoyer le tour
         send_message(sock, "tour/" + str(current_player))
@@ -217,6 +221,7 @@ def boucle_de_jeu(joueur):
 
         #recuperer la grille de tir
         if current_player != joueur:
+            last_grille_tir = grilles[f"joueur{current_player}"]["grille_tir"].copy()
             data = listen_message(sock)
             if data[0] == "grille_tir":
                 # transformer chain data 2 en liste
@@ -229,6 +234,20 @@ def boucle_de_jeu(joueur):
                     l.append(i)
                 grilles[data[1]]["grille_tir"] = l
 
+            # trouver la case qui a ete tire
+            for i in range(0, 100):
+                if last_grille_tir[i] != grilles[f"joueur{current_player}"]["grille_tir"][i]:
+                    case = i
+                    x = (case % 10) +1
+                    y = (case // 10) +1
+                    # afficher le resultat du tir
+                    if grilles[f"joueur{current_player}"]["grille_tir"][i] == "t":
+                        pg.croix(x, y, "green", X_GRILLES_BATEAU, Y_GRILLES_BATEAU)
+                    elif grilles[f"joueur{current_player}"]["grille_tir"][i] == "m":
+                        pg.croix(x, y, "red", X_GRILLES_BATEAU, Y_GRILLES_BATEAU)
+                    break
+
+
 
 
         # changer le joueur courant
@@ -236,15 +255,15 @@ def boucle_de_jeu(joueur):
         current_player = change_current_player(current_player)
 
         # verifier si le joueur a gagner
-        if check_win(grilles) == "joueur1":
-            send_message(sock, "win/joueur1")
+        if check_win(grilles) == "joueur1" or check_win(grilles) == "joueur2":
+            send_message(sock, "win/" + check_win(grilles))
             # recuperer le message
             data = listen_message(sock)
             if data[0] == "win":
                 if data[1] == f"joueur{joueur}":
                     pg.partie_gagnee()
                 else:
-                    pg.partie_perdue()
+                    pg.partie_perdu()
             break
 
 
@@ -301,10 +320,7 @@ def affiche_grilles(grilles, joueur):
         None
     """
     global current_player
-    X_GRILLES_TIR = 500
-    Y_GRILLES_TIR = -250
-    X_GRILLES_BATEAU = -50
-    Y_GRILLES_BATEAU = -250
+   
     pg.grille(X_GRILLES_TIR, Y_GRILLES_TIR)
     pg.grille(X_GRILLES_BATEAU, Y_GRILLES_BATEAU)
     pg.info_grille()
@@ -340,10 +356,10 @@ def check_win(grilles):
         str: "joueur1" or "joueur2" if a player has won the game
         False: if no player has won the game
     """
-    if grilles["joueur1"]["grille_bateau"].count("t") == 8:
-        return "joueur1 a gagné"
-    elif grilles["joueur2"]["grille_bateau"].count("t") == 8:
-        return "joueur2 a gagné"
+    if grilles["joueur1"]["grille_tir"].count("t") == 14:
+        return "joueur1"
+    elif grilles["joueur2"]["grille_tir"].count("t") == 14:
+        return "joueur2"
     else:
         return False
 
@@ -361,9 +377,7 @@ def tour(grilles, joueur, tir=None):
         [type:list]: contient les grilles des joueurs
     """
     global current_player
-    pg.blue_screen()
-    # afficher les grilles
-    affiche_grilles(grilles, joueur)
+    
 
     #faire le tir
     if joueur == current_player:
@@ -379,8 +393,14 @@ def tour(grilles, joueur, tir=None):
 
         if grilles[f"joueur{change_current_player(joueur)}"]["grille_bateau"][tir] == "b":
             grilles[f"joueur{joueur}"]["grille_tir"][tir] = "t"
+            # afficher le resultat du tir
+            pg.croix((tir%10)+1, (tir//10)+1, 'green', X_GRILLES_TIR, Y_GRILLES_TIR)
+
         else:
             grilles[f"joueur{joueur}"]["grille_tir"][tir] = "m"
+
+            # afficher le resultat du tir
+            pg.croix((tir%10)+1, (tir//10)+1, 'red', X_GRILLES_TIR, Y_GRILLES_TIR)
 
         return tir
     else:
@@ -392,6 +412,10 @@ def tour(grilles, joueur, tir=None):
 # method resaux_game
 def resaux_game(): 
     """AI is creating summary for resaux_game """
-    global grilles
+    global grilles, X_GRILLES_BATEAU, Y_GRILLES_BATEAU, X_GRILLES_TIR, Y_GRILLES_TIR
+    X_GRILLES_TIR = 500
+    Y_GRILLES_TIR = -250
+    X_GRILLES_BATEAU = -50
+    Y_GRILLES_BATEAU = -250
     grilles = {"joueur1": {"grille_bateau": [""]*100, "grille_tir": [""]*100}, "joueur2": {"grille_bateau": [""]*100, "grille_tir": [""]*100}}
     ask_for_be_server_client()
