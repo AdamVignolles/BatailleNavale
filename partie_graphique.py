@@ -227,9 +227,8 @@ def get_position_mouse(afterscreenclik, type_of_click=None, grilles=None, joueur
         None
 
     """
-    if afterscreenclik == "position_case":
-        tt.onscreenclick(lambda x, y: get_position_case(x,y, grilles, joueur))
-    elif afterscreenclik == "position_menu":
+    
+    if afterscreenclik == "position_menu":
         tt.onscreenclick(lambda x, y: get_position_menu(x,y, type_of_click))
     else:
         tt.onscreenclick(lambda x, y: print(x, y))

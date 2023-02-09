@@ -3,7 +3,7 @@
 #Jeu de la bataille naval
 import partie_graphique as pg
 import resaux
-from IA_GAME_v1 import *
+import IA_Game as ia
 import turtle as tt
 
 def choix_do(choix, type_choix):
@@ -11,7 +11,7 @@ def choix_do(choix, type_choix):
     if type_choix == "mode_de_jeu":
         if choix != "":
             if choix == "menu 1":
-                ia_game()
+                ia.ia_game()
             elif choix == "menu 2":
                 resaux.resaux_game()
     elif type_choix == "server":

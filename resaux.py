@@ -112,7 +112,7 @@ def wait_bateau(connexion):
 
 def genere_grille_bateau(joueur):
     global grilles
-    bateaux = [2, 2, 2, 2]
+    bateaux = [2, 3, 4, 5]
     grille_bateau = grilles[f'joueur{joueur}']['grille_bateau']
     for j in bateaux:
         sens = random.randint(0, 1)
